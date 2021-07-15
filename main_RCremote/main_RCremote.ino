@@ -36,6 +36,6 @@ void loop()
   vals[0] = Xval;
   vals[1] = Yval;
   vals[2] = Sval;
-  radio.write(&vals, sizeof(vals));
+  radio.write(&vals, sizeof(vals));    //Transmit the array containing joystick input information to receiver
   delay(50);
 }

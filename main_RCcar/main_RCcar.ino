@@ -27,13 +27,13 @@ int Sval;
 
 bool reading=false;
 int deadZone=100;
+
 float Yspeed;
 float l_dirScale, r_dirScale;
 int l_Yadjspeed, r_Yadjspeed;
 
 void setup() 
 {
-  Serial.begin(9600);
   radio.begin();
   radio.openReadingPipe(0, address);
   radio.setPALevel(RF24_PA_MIN);
@@ -42,7 +42,7 @@ void setup()
 
 void loop() 
 {
-  if (radio.available()) 
+  if (radio.available())                           //radio reads
   { 
     radio.read(&vals, sizeof(vals));
     Serial.print("received");
@@ -51,8 +51,12 @@ void loop()
   Xval = vals[0]-512;
   Yval = vals[1]-512;
   Sval = vals[2];
-  
-  if(Xval>0)
+
+  /*
+   * Steering will be done by scaling the value fed into the enable pin to differ the speed of the motors.
+   * The scaling depends on the value of X input of the joytick transmitted to the receiver.
+   */
+  if(Xval>0)                                       
   {
     l_dirScale = 1 - (abs(Xval)/2.)/256.;
     r_dirScale = 1;
@@ -63,6 +67,10 @@ void loop()
     r_dirScale = 1 - (abs(Xval)/2.)/256;
   }
   
+  /*
+   * Yspeed is the absolute value of speed dependent on the Y input received from the joystick.
+   * Yspeed will be adjusted and scaled according to l_dirScale/r_dirScale.
+   */
   Yspeed = (abs(Yval)/2.)-1;
 
   l_Yadjspeed = Yspeed * l_dirScale;
@@ -93,20 +101,5 @@ void loop()
     motor2.off();
   }
 
-  stats();
   delay(50);
-
-}
-
-void stats()
-{
-  Serial.print(Xval);
-  Serial.print(" ");
-  Serial.print(Yval);
-  Serial.print(" ");
-  Serial.print(Yspeed);
-  Serial.print(" ");
-  Serial.print(l_Yadjspeed);
-  Serial.print(" ");
-  Serial.println(r_Yadjspeed);
 }
